@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero" id="home">
+    <div class="shell hero-grid">
+        <div class="hero-copy">
+            <p class="eyebrow">AUDIO LAB · 数字信号处理</p>
+            <h1>让声音的结构<br><span>清晰可见</span></h1>
+            <p class="hero-lead">选择一个 WAV 文件，系统将在浏览器中完成元数据读取、时域特征计算、频谱分析和短时傅里叶变换。</p>
+            <a class="hero-button" href="#analysis">开始分析音频 <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="signal-card" aria-label="抽象音频波形装饰">
+            <div class="signal-topline">
+                <span>LIVE SIGNAL</span>
+                <span class="status-dot">READY</span>
+            </div>
+            <div class="wave" aria-hidden="true">
+                {% for height in [20,38,58,30,72,45,88,64,36,76,52,92,62,40,70,48,82,56,32,68,42,24] %}
+                <i style="--bar-height: {{ height }}%"></i>
+                {% endfor %}
+            </div>
+            <div class="signal-scale"><span>0 s</span><span>time domain</span><span>1.0 s</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="analysis-section" id="analysis">
+    <div class="shell section-grid">
+        <div class="section-heading">
+            <p class="section-index">01 / 在线分析</p>
+            <h2>上传你的 WAV 音频</h2>
+            <p>文件仅在操作系统的临时目录中参与本次计算；页面生成后临时文件会自动删除。</p>
+        </div>
+
+        <div class="upload-panel">
+            {% if error %}
+            <div class="alert" role="alert">
+                <strong>无法完成分析</strong>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" id="upload-form">
+                <label class="drop-zone" for="audio-file" id="drop-zone">
+                    <span class="upload-icon" aria-hidden="true">↑</span>
+                    <strong>点击选择或拖放 WAV 文件</strong>
+                    <span id="file-name">支持单声道或多声道，文件不超过 12 MB</span>
+                    <input id="audio-file" name="audio_file" type="file" accept=".wav,audio/wav" required>
+                </label>
+                <button class="analyze-button" type="submit" id="submit-button">
+                    <span>生成分析结果</span>
+                    <span aria-hidden="true">→</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+{% if result %}
+<section class="results-section" id="results">
+    <div class="shell">
+        <div class="result-title-row">
+            <div>
+                <p class="section-index light">02 / 分析结果</p>
+                <h2>{{ result.filename }}</h2>
+            </div>
+            <span class="complete-badge">分析完成</span>
+        </div>
+
+        <div class="metadata-grid">
+            <article><span>采样率</span><strong>{{ result.sample_rate }}</strong></article>
+            <article><span>声道数</span><strong>{{ result.channels }}</strong></article>
+            <article><span>采样点数</span><strong>{{ result.num_samples }}</strong></article>
+            <article><span>音频时长</span><strong>{{ result.duration }}</strong></article>
+        </div>
+
+        <div class="audio-player-card">
+            <div>
+                <span>原始数据类型</span>
+                <strong>{{ result.original_dtype }}</strong>
+            </div>
+            <audio controls preload="metadata" src="{{ result.audio_url }}">你的浏览器不支持音频播放。</audio>
+        </div>
+
+        <div class="result-layout">
+            <article class="feature-card">
+                <div class="card-heading">
+                    <p>NUMERICAL FEATURES</p>
+                    <h3>基础时域特征</h3>
+                </div>
+                <div class="feature-table" role="table" aria-label="音频特征">
+                    {% for feature in result.features %}
+                    <div class="feature-row" role="row">
+                        <span role="cell">{{ feature.label }}</span>
+                        <strong role="cell">{{ feature.value }} {{ feature.unit }}</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="figure-card">
+                <div class="card-heading">
+                    <p>WAVEFORM &amp; SPECTRUM</p>
+                    <h3>时域波形与单边频谱</h3>
+                </div>
+                <img src="{{ result.overview_url }}" alt="{{ result.filename }} 的时域波形和单边幅度频谱">
+            </article>
+
+            <article class="figure-card full-width">
+                <div class="card-heading">
+                    <p>SHORT-TIME FOURIER TRANSFORM</p>
+                    <h3>STFT 声谱图</h3>
+                </div>
+                <img src="{{ result.stft_url }}" alt="{{ result.filename }} 的短时傅里叶变换声谱图">
+            </article>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="principle-section" id="principle">
+    <div class="shell">
+        <div class="section-heading compact">
+            <p class="section-index">03 / 处理流程</p>
+            <h2>从文件到图像，四步完成</h2>
+        </div>
+        <div class="steps-grid">
+            <article><span>01</span><h3>读取</h3><p>SciPy 解析 WAV，并把整数采样值归一化。</p></article>
+            <article><span>02</span><h3>计算</h3><p>NumPy 计算幅值、能量、RMS 等基础特征。</p></article>
+            <article><span>03</span><h3>变换</h3><p>FFT 观察整体频率组成，STFT 观察频率随时间的变化。</p></article>
+            <article><span>04</span><h3>呈现</h3><p>Matplotlib 生成图像，Flask 将结果组织到网页中。</p></article>
+        </div>
+    </div>
+</section>
+{% endblock %}

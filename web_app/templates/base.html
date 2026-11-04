@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="基于 Python、NumPy、SciPy 与 Matplotlib 的语音信号分析与可视化系统">
+    <title>{% block title %}语音信号分析与可视化系统{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
+    <script src="{{ url_for('static', filename='js/upload.js') }}" defer></script>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+    <header class="site-header">
+        <div class="utility-bar">
+            <div class="shell utility-inner">
+                <span>Python 程序设计课程设计</span>
+                <nav aria-label="辅助导航">
+                    <a href="#analysis">在线分析</a>
+                    <a href="#principle">处理流程</a>
+                    <a href="https://github.com/BI-coder-1/audio-feature-visualization" target="_blank" rel="noreferrer">GitHub</a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="brand-row shell">
+            <a class="brand" href="{{ url_for('index') }}" aria-label="返回首页">
+                <span class="brand-mark" aria-hidden="true">∿</span>
+                <span>
+                    <strong>语音信号分析与可视化系统</strong>
+                    <small>Audio Signal Analysis &amp; Visualization</small>
+                </span>
+            </a>
+            <span class="course-badge">本科课程设计</span>
+        </div>
+
+        <nav class="main-nav" aria-label="主导航">
+            <div class="shell nav-inner">
+                <a href="#home">系统首页</a>
+                <a href="#analysis">音频分析</a>
+                <a href="#results">结果展示</a>
+                <a href="#principle">原理说明</a>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="shell footer-inner">
+            <div>
+                <strong>语音信号分析与可视化系统</strong>
+                <p>使用 Python 完成 WAV 读取、特征计算、频域分析与 STFT 可视化。</p>
+            </div>
+            <p>课程项目 · 本地运行 · 上传文件不留存</p>
+        </div>
+    </footer>
+</body>
+</html>
