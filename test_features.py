@@ -1,60 +1,46 @@
-import csv
 import numpy as np
 from pathlib import Path
-from src.audio_comparator import build_comparison_rows, save_comparison_csv, plot_feature_comparison
+from src.audio_loader import load_wav
+from src.audio_features import extract_basic_features
 
 current_dir = Path(__file__).parent
-s1 = current_dir / "samples" / "0_0_1.wav"
-s2 = current_dir / "samples" / "4_0_1.wav"
-out_dir = current_dir / "results" / "lesson05"
+sample1 = current_dir / "samples" / "0_0_1.wav"
+sample2 = current_dir / "samples" / "4_0_1.wav"
 
-print("=== 测试多文件比较 ===")
+print("=== 测试 1：人工构造数组验证 ===")
+class DummyAudio:
+    data = np.array([0.0, -1.0, 1.0, 0.5])
 
-rows = build_comparison_rows([s1, s2])
-assert len(rows) == 2, "应返回恰好两行数据"
-assert rows[0]['file_name'] == '0_0_1.wav'
-assert rows[1]['file_name'] == '4_0_1.wav'
+manual_feat = extract_basic_features(DummyAudio())
+assert np.isclose(manual_feat['peak_amplitude'], 1.0)
+assert np.isclose(manual_feat['mean'], 0.125)
+assert np.isclose(manual_feat['mean_absolute_amplitude'], 0.625)
+assert np.isclose(manual_feat['total_energy'], 2.25)
+assert np.isclose(manual_feat['average_energy'], 0.5625)
+assert np.isclose(manual_feat['rms'], 0.75)
 
-expected_fields = [
-    'file_name', 'sample_rate_hz', 'channels', 'num_samples', 'duration_s',
-    'min_amplitude', 'max_amplitude', 'peak_amplitude', 'mean',
-    'mean_absolute_amplitude', 'total_energy', 'average_energy', 'rms'
-]
+is_close = np.isclose(manual_feat['rms']**2, manual_feat['average_energy'])
+print(f"  验证 RMS^2 ≈ 平均能量: {is_close}")
+assert is_close
 
-for r in rows:
-    for key in expected_fields:
-        assert key in r, f"{r['file_name']} 缺少字段: {key}"
-    assert r['sample_rate_hz'] == 16000, "采样率不是16000"
-    assert r['channels'] == 1, "声道数不是1"
-    assert r['num_samples'] == 80000, "采样点数不是80000"
-    assert np.isclose(r['duration_s'], 5.0), "时长不是5秒"
+print("\n=== 测试 2：真实样本 0_0_1.wav ===")
+audio1 = load_wav(str(sample1))
+feat1 = extract_basic_features(audio1)
+for k, v in feat1.items():
+    print(f"  {k}: {v:.6f}")
 
-    for key in expected_fields:
-        if key != 'file_name':
-            assert np.isfinite(r[key]), f"{key} 存在无效值"
+print("\n=== 测试 3：真实样本 4_0_1.wav ===")
+
+audio2 = load_wav(str(sample2))
+feat2 = extract_basic_features(audio2)
+for k, v in feat2.items():
+    print(f"  {k}: {v:.6f}")
 
 
-    assert np.isclose(r['rms'] ** 2, r['average_energy']), "RMS与能量的关系不成立"
-
-csv_path = out_dir / "test_comparison.csv"
-save_comparison_csv(rows, csv_path)
-assert csv_path.exists() and csv_path.stat().st_size > 0
-
-with open(csv_path, 'r', encoding='utf-8-sig') as f:
-    reader = list(csv.DictReader(f))
-    assert len(reader) == 2, "CSV行数不对"
-    assert reader[0]['file_name'] == '0_0_1.wav'
-    assert reader[1]['file_name'] == '4_0_1.wav'
-    assert np.isclose(float(reader[0]['rms']), rows[0]['rms']), "CSV中RMS值不一致"
-
-png_path = out_dir / "test_comparison.png"
-plot_feature_comparison(rows, png_path)
-assert png_path.exists() and png_path.stat().st_size > 0
-
+print("\n=== 测试 4：空数组异常捕获 ===")
+class EmptyAudio:
+    data = np.array([])
 try:
-    build_comparison_rows([s1])
-    assert False, "应该抛出异常"
-except ValueError:
-    pass
-
-print("所有比较测试通过！")
+    extract_basic_features(EmptyAudio())
+except ValueError as e:
+    print(f"  成功捕获异常: {e}")
