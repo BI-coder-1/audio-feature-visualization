@@ -48,11 +48,8 @@ def plot_feature_comparison(rows, output_path):
     """绘制分量纲对比柱状图"""
     file_names = [r['file_name'] for r in rows]
 
-    # 提取要画的特征
-    amp_metrics = ['peak_amplitude', 'mean_absolute_amplitude', 'rms']
+    amp_metrics = ['Peak amplitude', 'Mean absolute', 'RMS']
     energy_metric = ['average_energy']
-
-    # 准备数据
     x = np.arange(len(amp_metrics))
     width = 0.35
 
@@ -60,7 +57,7 @@ def plot_feature_comparison(rows, output_path):
 
     # 上图：幅度对比
     for i, r in enumerate(rows):
-        vals = [r[m] for m in amp_metrics]
+        vals = [r[m] for m in ['peak_amplitude', 'mean_absolute_amplitude', 'rms']]
         offset = width * i - width / 2 * (len(rows) - 1)
         ax1.bar(x + offset, vals, width, label=r['file_name'])
 
