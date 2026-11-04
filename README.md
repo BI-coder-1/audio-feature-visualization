@@ -46,6 +46,10 @@
 6. 运行可视化测试: `python test_visualization.py`
 
    （注：生成的图片保存在 `results/lesson04/` 目录下，不会上传到 GitHub。）
+7. 运行多文件对比与导出：`python main.py` （在菜单中选择 2）
+
+8. 运行比较测试：`python test_comparison.py`
+（注：CSV表格和对比图保存在 results/lesson05/ 目录下。）
 
 ## 已实现特征
 
