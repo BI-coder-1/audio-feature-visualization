@@ -34,6 +34,7 @@ def plot_audio_overview(audio, output_path):
 
     freq_axis, amplitude = compute_single_sided_spectrum(audio)
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), facecolor='white')
+    fig.suptitle(f"Audio Overview — {Path(audio.filepath).name}", fontsize=14)
     ax1.plot(time_axis, data, color='#1f77b4', linewidth=0.5)
     ax1.set_title("Time Domain Waveform")
     ax1.set_xlabel("Time (s)")
