@@ -6,7 +6,7 @@
         <div class="hero-copy">
             <p class="eyebrow">AUDIO LAB · 数字信号处理</p>
             <h1>让声音的结构<br><span>清晰可见</span></h1>
-            <p class="hero-lead">选择一个 WAV 文件，系统将在浏览器中完成元数据读取、时域特征计算、频谱分析和短时傅里叶变换。</p>
+            <p class="hero-lead">从基础幅值到短时能量、过零率、频谱统计、MFCC 与 STFT，用一套可解释流程观察声音。</p>
             <a class="hero-button" href="#analysis">开始分析音频 <span aria-hidden="true">→</span></a>
         </div>
         <div class="signal-card" aria-label="抽象音频波形装饰">
@@ -28,8 +28,8 @@
     <div class="shell section-grid">
         <div class="section-heading">
             <p class="section-index">01 / 在线分析</p>
-            <h2>上传你的 WAV 音频</h2>
-            <p>文件仅在操作系统的临时目录中参与本次计算；页面生成后临时文件会自动删除。</p>
+            <h2>选择分析模式</h2>
+            <p>可以深度分析一个文件，也可以并排比较两个文件。文件仅在临时目录中参与本次计算。</p>
         </div>
 
         <div class="upload-panel">
@@ -40,18 +40,57 @@
             </div>
             {% endif %}
 
-            <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" id="upload-form">
-                <label class="drop-zone" for="audio-file" id="drop-zone">
-                    <span class="upload-icon" aria-hidden="true">↑</span>
-                    <strong>点击选择或拖放 WAV 文件</strong>
-                    <span id="file-name">支持单声道或多声道，文件不超过 12 MB</span>
-                    <input id="audio-file" name="audio_file" type="file" accept=".wav,audio/wav" required>
-                </label>
-                <button class="analyze-button" type="submit" id="submit-button">
-                    <span>生成分析结果</span>
-                    <span aria-hidden="true">→</span>
+            <div class="mode-switch" role="tablist" aria-label="分析模式">
+                <button type="button" role="tab" data-mode-button="single"
+                        aria-selected="{{ 'true' if active_mode == 'single' else 'false' }}">
+                    单文件深度分析
                 </button>
-            </form>
+                <button type="button" role="tab" data-mode-button="compare"
+                        aria-selected="{{ 'true' if active_mode == 'compare' else 'false' }}">
+                    双文件特征比较
+                </button>
+            </div>
+
+            <div data-mode-panel="single" {% if active_mode != 'single' %}hidden{% endif %}>
+                <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" class="analysis-form">
+                    <label class="drop-zone" for="audio-file" data-drop-zone>
+                        <span class="upload-icon" aria-hidden="true">↑</span>
+                        <strong>点击选择或拖放 WAV 文件</strong>
+                        <span id="file-name">支持单声道或多声道，请求总量不超过 12 MB</span>
+                        <input id="audio-file" name="audio_file" type="file" accept=".wav,audio/wav"
+                               data-file-label="file-name" required>
+                    </label>
+                    <button class="analyze-button" type="submit">
+                        <span>生成深度分析结果</span>
+                        <span aria-hidden="true">→</span>
+                    </button>
+                </form>
+            </div>
+
+            <div data-mode-panel="compare" {% if active_mode != 'compare' %}hidden{% endif %}>
+                <form action="{{ url_for('compare') }}" method="post" enctype="multipart/form-data" class="analysis-form">
+                    <div class="compare-upload-grid">
+                        <label class="drop-zone compact" for="audio-file-a" data-drop-zone>
+                            <span class="upload-letter" aria-hidden="true">A</span>
+                            <strong>选择第一个 WAV</strong>
+                            <span id="file-name-a">音频 A</span>
+                            <input id="audio-file-a" name="audio_file_a" type="file" accept=".wav,audio/wav"
+                                   data-file-label="file-name-a" required>
+                        </label>
+                        <label class="drop-zone compact" for="audio-file-b" data-drop-zone>
+                            <span class="upload-letter" aria-hidden="true">B</span>
+                            <strong>选择第二个 WAV</strong>
+                            <span id="file-name-b">音频 B</span>
+                            <input id="audio-file-b" name="audio_file_b" type="file" accept=".wav,audio/wav"
+                                   data-file-label="file-name-b" required>
+                        </label>
+                    </div>
+                    <button class="analyze-button" type="submit">
+                        <span>比较完整音频特征</span>
+                        <span aria-hidden="true">→</span>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </section>
@@ -64,7 +103,10 @@
                 <p class="section-index light">02 / 分析结果</p>
                 <h2>{{ result.filename }}</h2>
             </div>
-            <span class="complete-badge">分析完成</span>
+            <div class="result-actions">
+                <a class="download-button" href="{{ result.csv_url }}" download="{{ result.csv_name }}">下载 CSV</a>
+                <span class="complete-badge">分析完成</span>
+            </div>
         </div>
 
         <div class="metadata-grid">
@@ -113,7 +155,60 @@
                 </div>
                 <img src="{{ result.stft_url }}" alt="{{ result.filename }} 的短时傅里叶变换声谱图">
             </article>
+
+            <article class="figure-card full-width">
+                <div class="card-heading">
+                    <p>TEMPORAL &amp; CEPSTRAL FEATURES</p>
+                    <h3>短时能量、过零率与 MFCC</h3>
+                </div>
+                <img src="{{ result.advanced_url }}" alt="{{ result.filename }} 的短时能量、过零率和 MFCC 分析图">
+            </article>
         </div>
+    </div>
+</section>
+{% endif %}
+
+{% if comparison %}
+<section class="results-section" id="results">
+    <div class="shell">
+        <div class="result-title-row">
+            <div>
+                <p class="section-index light">02 / 特征比较</p>
+                <h2>双文件对比完成</h2>
+            </div>
+            <div class="result-actions">
+                <a class="download-button" href="{{ comparison.csv_url }}" download="audio_comparison.csv">下载比较 CSV</a>
+                <span class="complete-badge">比较完成</span>
+            </div>
+        </div>
+
+        <div class="comparison-table-wrap">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>文件</th><th>采样率</th><th>声道</th><th>时长</th>
+                        <th>峰值幅度</th><th>RMS</th><th>平均能量</th><th>过零率</th><th>频谱质心</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in comparison.rows %}
+                    <tr>
+                        <td>{{ row.file_name }}</td><td>{{ row.sample_rate }}</td><td>{{ row.channels }}</td>
+                        <td>{{ row.duration }}</td><td>{{ row.peak }}</td><td>{{ row.rms }}</td>
+                        <td>{{ row.energy }}</td><td>{{ row.zcr }}</td><td>{{ row.centroid }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <article class="figure-card comparison-figure">
+            <div class="card-heading">
+                <p>FEATURE COMPARISON</p>
+                <h3>幅值、RMS 与平均能量对比</h3>
+            </div>
+            <img src="{{ comparison.chart_url }}" alt="两个音频文件的特征对比柱状图">
+        </article>
     </div>
 </section>
 {% endif %}
@@ -122,13 +217,13 @@
     <div class="shell">
         <div class="section-heading compact">
             <p class="section-index">03 / 处理流程</p>
-            <h2>从文件到图像，四步完成</h2>
+            <h2>从波形到可解释特征</h2>
         </div>
         <div class="steps-grid">
             <article><span>01</span><h3>读取</h3><p>SciPy 解析 WAV，并把整数采样值归一化。</p></article>
-            <article><span>02</span><h3>计算</h3><p>NumPy 计算幅值、能量、RMS 等基础特征。</p></article>
-            <article><span>03</span><h3>变换</h3><p>FFT 观察整体频率组成，STFT 观察频率随时间的变化。</p></article>
-            <article><span>04</span><h3>呈现</h3><p>Matplotlib 生成图像，Flask 将结果组织到网页中。</p></article>
+            <article><span>02</span><h3>短时分析</h3><p>25 ms 分帧计算短时能量与过零率，观察声音随时间变化。</p></article>
+            <article><span>03</span><h3>频谱与倒谱</h3><p>FFT、STFT 与 MFCC 分别描述频率组成、时频结构和音色包络。</p></article>
+            <article><span>04</span><h3>比较与导出</h3><p>统一指标比较两个音频，并导出 CSV 供报告复核。</p></article>
         </div>
     </div>
 </section>
