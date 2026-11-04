@@ -22,6 +22,7 @@ def compute_stft_db(audio, nperseg=512, noverlap=384, floor_db=-80.0):
     if len(data.shape) > 1:
         data = np.mean(data, axis=1)
     data = data - np.mean(data)
+
     f, t, Zxx = stft(data, fs=audio.sample_rate, window="hann", nperseg=nperseg,
                      noverlap=noverlap, nfft=nperseg, boundary=None, padded=False)
 
@@ -31,8 +32,11 @@ def compute_stft_db(audio, nperseg=512, noverlap=384, floor_db=-80.0):
     if max_mag == 0:
         magnitude_db = np.full_like(magnitude, floor_db)
     else:
-        magnitude_db = 20 * np.log10(magnitude / max_mag)
-        magnitude_db = np.maximum(magnitude_db, floor_db)
+        # 修复除零漏洞：先计算最小比例，截断后再取 log10
+        minimum_ratio = 10 ** (floor_db / 20.0)
+        relative_magnitude = magnitude / max_mag
+        safe_ratio = np.maximum(relative_magnitude, minimum_ratio)
+        magnitude_db = 20 * np.log10(safe_ratio)
 
     return f, t, magnitude_db
 
