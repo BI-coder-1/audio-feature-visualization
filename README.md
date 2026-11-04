@@ -34,9 +34,18 @@
 #### 快速开始
 
 1. 激活虚拟环境: `.\.venv\Scripts\Activate.ps1`
+
 2. 安装依赖: `pip install -r requirements.txt`
+
 3. 运行 WAV 读取测试: `python test_load.py`
+
 4. 运行基础特征计算: `python test_features.py`
+
+5. 生成时域波形与频谱图: `python visualize_audio.py`
+
+6. 运行可视化测试: `python test_visualization.py`
+
+   （注：生成的图片保存在 `results/lesson04/` 目录下，不会上传到 GitHub。）
 
 ## 已实现特征
 
