@@ -31,6 +31,7 @@
 - `docs/` 文档
 - `tests/` 测试
 - `web_app/` 本地交互式网页
+- `render.yaml` Render 公网部署配置
 
 #### 快速开始
 
@@ -66,6 +67,14 @@
 13. 运行进阶特征测试：`python test_advanced_features.py`
 
 14. 在控制台运行进阶分析：`python main.py`（在菜单中选择 4）
+
+## 公网部署
+
+本项目已配置为 Render Web Service。PR 合并到 `main` 后，可使用下面的入口创建固定 HTTPS 公网地址：
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/BI-coder-1/audio-feature-visualization)
+
+生产环境由 Gunicorn 启动 `web_app.wsgi:app`，健康检查地址为 `/health`。免费实例闲置后会休眠，第一次重新访问需要等待平台唤醒。完整步骤与安全边界见 `docs/web_app.md`。
 
 ## 已实现特征
 
