@@ -134,6 +134,12 @@ def create_app(test_config: dict | None = None) -> Flask:
     def index():
         return render_home()
 
+    @app.get("/health")
+    def health():
+        """供云平台确认进程仍能正常响应，不执行耗时音频分析。"""
+
+        return {"status": "ok", "service": "audio-signal-analysis"}
+
     @app.post("/analyze")
     def analyze():
         try:
