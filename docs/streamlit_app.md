@@ -1,28 +1,37 @@
-# Streamlit 公网页面说明
+# Streamlit 公网页面与魔搭入口说明
 
 ## 1. 为什么保留两个网页入口
 
 项目没有把原来的 Flask 页面删除：
 
 - `python -m web_app` 启动 Flask 本地版，适合学习路由、模板、HTML、CSS 和表单上传。
-- `streamlit run streamlit_app.py` 启动 Streamlit 版，适合免费发布到公网。
+- `streamlit run app.py` 启动 Streamlit 版，适合发布到魔搭创空间。
 
 两个入口都调用 `src` 中同一批音频算法，因此不会出现“本地算一种结果，公网又算另一种结果”的问题。
 
 ## 2. 代码区域怎样分工
 
+### `app.py`
+
+魔搭的 Streamlit 创空间从项目根目录寻找 `app.py`。本文件只导入并调用 `streamlit_app.main()`，不重复任何页面或算法代码。这样做有三个好处：
+
+1. 满足魔搭的固定入口约定。
+2. 本地和公网执行同一个 `main()`，避免两套页面逐渐产生差异。
+3. 入口只有少量代码，本科生可以直接看懂程序从哪里开始运行。
+
 ### `streamlit_app.py`
 
 这一层只负责网页交互：
 
-1. `st.set_page_config()` 设置网页标题、图标和宽屏布局。
-2. `inject_styles()` 注入深蓝色课程设计样式，不复制学校官网素材。
-3. `st.file_uploader()` 在浏览器中显示 WAV 选择框。
-4. `st.button()` 让分析只在用户主动点击后执行。
-5. `st.spinner()` 在计算期间显示等待提示。
-6. `st.metric()`、`st.dataframe()`、`st.image()` 和 `st.audio()` 分别展示元数据、特征表、图像和音频播放器。
-7. `st.download_button()` 把内存中的 CSV 交给浏览器下载。
-8. `st.session_state` 暂存当前会话的结果，避免点击下载或切换控件时立刻丢失分析内容。
+1. `main()` 是页面总装函数，按固定顺序调用其他小函数。
+2. `st.set_page_config()` 设置网页标题、图标和宽屏布局。
+3. `inject_styles()` 注入深蓝色课程设计样式，不复制学校官网素材。
+4. `st.file_uploader()` 在浏览器中显示 WAV 选择框。
+5. `st.button()` 让分析只在用户主动点击后执行。
+6. `st.spinner()` 在计算期间显示等待提示。
+7. `st.metric()`、`st.dataframe()`、`st.image()` 和 `st.audio()` 分别展示元数据、特征表、图像和音频播放器。
+8. `st.download_button()` 把内存中的 CSV 交给浏览器下载。
+9. `st.session_state` 暂存当前会话的结果，避免点击下载或切换控件时立刻丢失分析内容。
 
 页面中的学院、班级、姓名和学号是作者归属标识，不等同于专利或软件著作权登记。
 
@@ -58,7 +67,7 @@ SHA-256 在这里只用于识别当前会话中的文件变化，不用于证明
 
 ```powershell
 Set-Location -LiteralPath 'G:\ICASSP\python_houshijun_test'
-.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py
+.\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
 浏览器默认打开 `http://localhost:8501`。测试命令：
@@ -67,34 +76,33 @@ Set-Location -LiteralPath 'G:\ICASSP\python_houshijun_test'
 .\.venv\Scripts\python.exe test_streamlit_app.py
 ```
 
-测试会验证：非 WAV 被拒绝、17 项特征齐全、三张图确为 PNG、CSV 编码正确、双文件顺序正确，并使用 Streamlit 的 `AppTest` 确认首页启动时没有异常。
+测试会验证：非 WAV 被拒绝、17 项特征齐全、三张图确为 PNG、CSV 编码正确、双文件顺序正确，并使用 Streamlit 的 `AppTest` 从魔搭入口 `app.py` 启动页面，检查标题和首页是否正常。
 
-## 6. 免费公网部署
+## 6. 魔搭公网部署
 
 PR 合并到 `main` 后：
 
-1. 打开 `https://share.streamlit.io/` 并登录。
-2. 连接拥有仓库管理权限的 GitHub 账号。
-3. 点击 **Create app**，选择已有应用。
-4. Repository 填写 `BI-coder-1/audio-feature-visualization`。
-5. Branch 选择 `main`。
-6. Main file path 填写 `streamlit_app.py`。
-7. Advanced settings 中选择 Python 3.12。
-8. 自定义子域名建议填写 `sxu-audio-analysis-202501071025`。
-9. 点击 Deploy，等待依赖安装与页面启动。
+1. 打开 `https://modelscope.cn/studios` 并登录。
+2. 点击“我要创建”，名称建议使用 `sxu-audio-analysis-202501071025`。
+3. 调试阶段选择私有，应用部署框架选择 Streamlit。
+4. 云资源选择免费 CPU，镜像使用平台推荐版本。
+5. 导入 GitHub `main` 分支，或使用创空间页面提供的 Git 仓库地址上传代码。
+6. 确认根目录存在 `app.py` 和 `requirements.txt`，点击确认并部署。
+7. 在日志中确认依赖安装完成，并在页面验证上传、播放、图表和 CSV 下载。
+8. 全部正常后再改为公开，并复制平台实际生成的访问链接。
 
-如果该子域名仍可用，地址将是：
+创空间地址通常是：
 
 ```text
-https://sxu-audio-analysis-202501071025.streamlit.app
+https://modelscope.cn/studios/<用户名>/<创空间名>
 ```
 
-Streamlit Community Cloud 会读取根目录的 `requirements.txt` 安装依赖，并读取 `.streamlit/config.toml` 将单文件上传限制为 12 MB。GitHub 的 `main` 更新后，云端应用会自动重新部署。
+魔搭会读取根目录的 `requirements.txt` 安装依赖，并通过根目录 `app.py` 启动 Streamlit。`.streamlit/config.toml` 将单文件上传限制为 12 MB。免费 CPU 空闲后可能休眠，重新访问时等待平台再次启动即可。完整操作清单见 `docs/modelscope_deployment.md`。
 
 ## 7. 隐私和能力边界
 
 - 用户文件不写入课程项目的 `data` 目录，也不提交到 GitHub。
 - 临时文件会在本次分析函数结束后删除，但公网平台仍然会接收上传字节，因此不要上传机密、隐私或无权处理的录音。
 - `session_state` 只服务于当前浏览器会话，不是长期数据库。
-- 免费平台存在休眠和资源限制，不承诺高并发或持续在线。
+- 免费 CPU 存在休眠和资源限制，不承诺高并发或持续在线。
 - 系统只做描述性分析，不训练语音识别模型，也不判断说话人身份。
