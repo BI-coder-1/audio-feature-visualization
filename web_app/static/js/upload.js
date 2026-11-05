@@ -1,45 +1,60 @@
-const fileInput = document.querySelector("#audio-file");
-const fileName = document.querySelector("#file-name");
-const dropZone = document.querySelector("#drop-zone");
-const uploadForm = document.querySelector("#upload-form");
-const submitButton = document.querySelector("#submit-button");
+const modeButtons = document.querySelectorAll("[data-mode-button]");
+const modePanels = document.querySelectorAll("[data-mode-panel]");
 
-function showSelectedFile(file) {
-    if (file && fileName) {
-        fileName.textContent = `已选择：${file.name}`;
-        dropZone?.classList.add("has-file");
-    }
+function activateMode(selectedMode) {
+    modeButtons.forEach((button) => {
+        const isSelected = button.dataset.modeButton === selectedMode;
+        button.setAttribute("aria-selected", String(isSelected));
+    });
+    modePanels.forEach((panel) => {
+        panel.hidden = panel.dataset.modePanel !== selectedMode;
+    });
 }
 
-fileInput?.addEventListener("change", () => {
-    showSelectedFile(fileInput.files[0]);
+modeButtons.forEach((button) => {
+    button.addEventListener("click", () => activateMode(button.dataset.modeButton));
 });
 
-["dragenter", "dragover"].forEach((eventName) => {
-    dropZone?.addEventListener(eventName, (event) => {
-        event.preventDefault();
-        dropZone.classList.add("is-dragging");
-    });
-});
+document.querySelectorAll("input[type='file'][data-file-label]").forEach((fileInput) => {
+    const fileName = document.getElementById(fileInput.dataset.fileLabel);
+    const dropZone = fileInput.closest("[data-drop-zone]");
 
-["dragleave", "drop"].forEach((eventName) => {
-    dropZone?.addEventListener(eventName, (event) => {
-        event.preventDefault();
-        dropZone.classList.remove("is-dragging");
-    });
-});
-
-dropZone?.addEventListener("drop", (event) => {
-    const droppedFiles = event.dataTransfer.files;
-    if (droppedFiles.length > 0 && fileInput) {
-        fileInput.files = droppedFiles;
-        showSelectedFile(droppedFiles[0]);
+    function showSelectedFile(file) {
+        if (file && fileName) {
+            fileName.textContent = `已选择：${file.name}`;
+            dropZone.classList.add("has-file");
+        }
     }
+
+    fileInput.addEventListener("change", () => showSelectedFile(fileInput.files[0]));
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            dropZone.classList.add("is-dragging");
+        });
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            dropZone.classList.remove("is-dragging");
+        });
+    });
+
+    dropZone.addEventListener("drop", (event) => {
+        const droppedFiles = event.dataTransfer.files;
+        if (droppedFiles.length > 0) {
+            fileInput.files = droppedFiles;
+            showSelectedFile(droppedFiles[0]);
+        }
+    });
 });
 
-uploadForm?.addEventListener("submit", () => {
-    if (submitButton) {
+document.querySelectorAll(".analysis-form").forEach((form) => {
+    form.addEventListener("submit", () => {
+        const submitButton = form.querySelector("button[type='submit']");
         submitButton.disabled = true;
-        submitButton.querySelector("span").textContent = "正在分析，请稍候…";
-    }
+        submitButton.querySelector("span").textContent = "正在计算，请稍候…";
+    });
 });
