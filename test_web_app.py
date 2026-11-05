@@ -17,7 +17,11 @@ print("=== 测试交互式网页 ===")
 
 home_response = client.get("/")
 assert home_response.status_code == 200
-assert "语音信号分析与可视化系统" in home_response.get_data(as_text=True)
+home_html = home_response.get_data(as_text=True)
+assert "语音信号分析与可视化系统" in home_html
+assert "山西大学人工智能学院" in home_html
+assert "2501 · 侯世俊 · 202501071025" in home_html
+assert 'name="author" content="山西大学人工智能学院 2501 侯世俊"' in home_html
 
 missing_response = client.post("/analyze", data={})
 assert missing_response.status_code == 400

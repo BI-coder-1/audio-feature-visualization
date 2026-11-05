@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="基于 Python、NumPy、SciPy 与 Matplotlib 的语音信号分析与可视化系统">
+    <meta name="author" content="山西大学人工智能学院 2501 侯世俊">
+    <meta name="copyright" content="侯世俊（学号：202501071025）">
     <title>{% block title %}语音信号分析与可视化系统{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
     <script src="{{ url_for('static', filename='js/upload.js') }}" defer></script>
@@ -31,7 +33,10 @@
                     <small>Audio Signal Analysis &amp; Visualization</small>
                 </span>
             </a>
-            <span class="course-badge">本科课程设计</span>
+            <span class="identity-badge" aria-label="课程设计作者信息">
+                <strong>山西大学人工智能学院</strong>
+                <small>2501 · 侯世俊 · 202501071025</small>
+            </span>
         </div>
 
         <nav class="main-nav" aria-label="主导航">
@@ -54,7 +59,11 @@
                 <strong>语音信号分析与可视化系统</strong>
                 <p>使用 Python 完成 WAV 读取、特征计算、频域分析与 STFT 可视化。</p>
             </div>
-            <p>课程项目 · 本地运行 · 上传文件不留存</p>
+            <div class="author-signature">
+                <strong>原创课程设计标识</strong>
+                <p>山西大学人工智能学院 · 2501 · 侯世俊</p>
+                <p>学号：202501071025 · 本地运行 · 上传文件不留存</p>
+            </div>
         </div>
     </footer>
 </body>

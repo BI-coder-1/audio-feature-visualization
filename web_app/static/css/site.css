@@ -47,7 +47,7 @@ button, input { font: inherit; }
 .utility-inner nav { display: flex; gap: 25px; max-width: 100%; overflow-x: auto; white-space: nowrap; }
 .utility-inner a:hover, .utility-inner a:focus { color: var(--cyan-400); }
 
-.brand-row { min-height: 105px; display: flex; align-items: center; justify-content: space-between; }
+.brand-row { min-height: 105px; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
 .brand { display: inline-flex; align-items: center; gap: 16px; }
 .brand-mark {
     width: 58px;
@@ -61,7 +61,16 @@ button, input { font: inherit; }
 }
 .brand strong { display: block; color: var(--navy-900); font-family: SimSun, STSong, serif; font-size: clamp(20px, 2.4vw, 30px); letter-spacing: 0.08em; }
 .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
-.course-badge { padding: 8px 14px; border: 1px solid var(--line); color: var(--navy-800); font-size: 13px; letter-spacing: 0.12em; }
+.identity-badge {
+    min-width: 265px;
+    padding: 10px 15px;
+    border: 1px solid var(--line);
+    color: var(--navy-800);
+    background: rgba(255, 255, 255, .72);
+    text-align: right;
+}
+.identity-badge strong { display: block; font-size: 13px; letter-spacing: .08em; }
+.identity-badge small { display: block; margin-top: 2px; color: var(--muted); font: 11px/1.5 Consolas, monospace; letter-spacing: .05em; }
 
 .main-nav { color: var(--white); background: var(--navy-900); }
 .nav-inner { display: flex; }
@@ -162,6 +171,8 @@ button, input { font: inherit; }
 .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; }
 .footer-inner strong { color: var(--white); }
 .footer-inner p { margin: 6px 0 0; font-size: 13px; }
+.author-signature { padding-left: 22px; border-left: 2px solid var(--gold-500); text-align: right; }
+.author-signature p + p { margin-top: 1px; color: #829db2; font: 11px/1.6 Consolas, monospace; }
 
 @media (max-width: 900px) {
     .hero-grid, .section-grid, .result-layout { grid-template-columns: 1fr; }
@@ -173,12 +184,13 @@ button, input { font: inherit; }
 
 @media (max-width: 620px) {
     :root { --shell: min(1180px, calc(100% - 24px)); }
-    .utility-inner > span, .course-badge { display: none; }
+    .utility-inner > span { display: none; }
     .utility-inner { justify-content: flex-end; }
-    .brand-row { min-height: 86px; }
+    .brand-row { min-height: 0; padding-block: 18px; align-items: flex-start; flex-direction: column; gap: 14px; }
     .brand-mark { width: 46px; height: 46px; font-size: 28px; }
     .brand strong { font-size: 18px; }
     .brand small { font-size: 9px; }
+    .identity-badge { width: 100%; min-width: 0; padding: 8px 12px; text-align: left; }
     .hero h1 { font-size: 45px; }
     .signal-card { padding: 19px; }
     .wave { height: 165px; gap: 3px; }
@@ -189,4 +201,5 @@ button, input { font: inherit; }
     .audio-player-card { grid-template-columns: 1fr; }
     .result-title-row, .result-actions { align-items: flex-start; flex-direction: column; gap: 15px; }
     .footer-inner { align-items: flex-start; flex-direction: column; }
+    .author-signature { padding: 14px 0 0; border-top: 2px solid var(--gold-500); border-left: 0; text-align: left; }
 }
