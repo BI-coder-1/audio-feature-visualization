@@ -1,6 +1,6 @@
-"""Streamlit Community Cloud 公网入口。
+"""Streamlit 公网页面实现。
 
-运行命令：``streamlit run streamlit_app.py``
+本地运行命令：``streamlit run app.py``
 本文件只组织网页控件；所有音频计算由 ``src`` 和
 ``web_app.streamlit_support`` 完成。
 """
@@ -12,14 +12,6 @@ import hashlib
 import streamlit as st
 
 from web_app.streamlit_support import analyze_wav_bytes, compare_wav_bytes
-
-
-st.set_page_config(
-    page_title="语音信号分析与可视化系统",
-    page_icon="〰",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
 
 
 def inject_styles() -> None:
@@ -231,38 +223,51 @@ def render_footer() -> None:
     )
 
 
-inject_styles()
-render_header()
-st.markdown('<div class="section-label">01 / 在线分析</div>', unsafe_allow_html=True)
-st.header("选择分析模式")
-st.markdown(
-    '<div class="privacy-note">隐私提示：公网平台会接收上传内容，请勿上传机密、隐私或无权处理的录音。临时文件在每次分析结束后自动删除。</div>',
-    unsafe_allow_html=True,
-)
+def main() -> None:
+    """按固定顺序组装完整页面，供本地和魔搭入口共同调用。"""
 
-mode = st.radio(
-    "分析模式",
-    ["单文件深度分析", "双文件特征比较"],
-    horizontal=True,
-    label_visibility="collapsed",
-)
-
-if mode == "单文件深度分析":
-    render_single_mode()
-else:
-    render_comparison_mode()
-
-with st.expander("查看计算流程与指标边界"):
+    st.set_page_config(
+        page_title="语音信号分析与可视化系统",
+        page_icon="〰",
+        layout="wide",
+        initial_sidebar_state="collapsed",
+    )
+    inject_styles()
+    render_header()
+    st.markdown('<div class="section-label">01 / 在线分析</div>', unsafe_allow_html=True)
+    st.header("选择分析模式")
     st.markdown(
-        """
-        1. 读取 WAV 并获取采样率、声道数、采样点数与时长。
-        2. 将整数采样归一化后计算幅度、能量、RMS、短时能量和过零率。
-        3. 计算主频、频谱质心、带宽、85% 滚降点和平坦度。
-        4. 使用 25 ms 帧长、10 ms 帧移、26 个 Mel 滤波器计算 13 维 MFCC。
-        5. 绘制波形、频谱、STFT 以及短时特征四联图。
-
-        这些指标用于描述音频，不执行语音识别或身份判断；主频也不自动等同于人的基频。
-        """
+        '<div class="privacy-note">隐私提示：公网平台会接收上传内容，请勿上传机密、隐私或无权处理的录音。临时文件在每次分析结束后自动删除。</div>',
+        unsafe_allow_html=True,
     )
 
-render_footer()
+    mode = st.radio(
+        "分析模式",
+        ["单文件深度分析", "双文件特征比较"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+
+    if mode == "单文件深度分析":
+        render_single_mode()
+    else:
+        render_comparison_mode()
+
+    with st.expander("查看计算流程与指标边界"):
+        st.markdown(
+            """
+            1. 读取 WAV 并获取采样率、声道数、采样点数与时长。
+            2. 将整数采样归一化后计算幅度、能量、RMS、短时能量和过零率。
+            3. 计算主频、频谱质心、带宽、85% 滚降点和平坦度。
+            4. 使用 25 ms 帧长、10 ms 帧移、26 个 Mel 滤波器计算 13 维 MFCC。
+            5. 绘制波形、频谱、STFT 以及短时特征四联图。
+
+            这些指标用于描述音频，不执行语音识别或身份判断；主频也不自动等同于人的基频。
+            """
+        )
+
+    render_footer()
+
+
+if __name__ == "__main__":
+    main()

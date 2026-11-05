@@ -64,8 +64,10 @@ assert comparison_result["table_rows"][1]["文件"] == SAMPLE_B.name
 assert comparison_result["chart_png"].startswith(b"\x89PNG")
 assert b"file_name" in comparison_result["csv_bytes"]
 
-app_test = AppTest.from_file(PROJECT_ROOT / "streamlit_app.py")
+app_test = AppTest.from_file(PROJECT_ROOT / "app.py")
 app_test.run(timeout=30)
 assert not app_test.exception
+assert app_test.header[0].value == "选择分析模式"
+assert any("山西大学人工智能学院" in element.value for element in app_test.markdown)
 
-print("Streamlit 页面测试全部通过！")
+print("魔搭 Streamlit 入口与页面测试全部通过！")

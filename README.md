@@ -31,7 +31,8 @@
 - `docs/` 文档
 - `tests/` 测试
 - `web_app/` 本地交互式网页
-- `streamlit_app.py` Streamlit Community Cloud 公网入口
+- `app.py` 魔搭创空间固定启动入口
+- `streamlit_app.py` Streamlit 页面实现
 - `.streamlit/` Streamlit 页面与上传限制配置
 
 #### 快速开始
@@ -69,21 +70,22 @@
 
 14. 在控制台运行进阶分析：`python main.py`（在菜单中选择 4）
 
-15. 本地预览 Streamlit 公网页面：`streamlit run streamlit_app.py`
+15. 本地预览 Streamlit 公网页面：`streamlit run app.py`
 
 16. 运行 Streamlit 页面测试：`python test_streamlit_app.py`
 
 ## 公网部署
 
-本项目使用免费的 Streamlit Community Cloud 提供公网入口，不需要绑定银行卡。PR 合并到 `main` 后：
+本项目使用魔搭 ModelScope 创空间提供公网入口。PR 合并到 `main` 后：
 
-1. 登录 [Streamlit Community Cloud](https://share.streamlit.io/)。
-2. 连接 GitHub，并选择 `BI-coder-1/audio-feature-visualization`。
-3. Branch 选择 `main`，Main file path 填写 `streamlit_app.py`。
-4. Advanced settings 中选择 Python 3.12。
-5. 可把自定义子域名设置为 `sxu-audio-analysis-202501071025`，然后点击 Deploy。
+1. 登录 [魔搭创空间](https://modelscope.cn/studios)，点击“我要创建”。
+2. 名称建议填写 `sxu-audio-analysis-202501071025`，调试阶段先设为私有。
+3. 应用部署框架选择 `Streamlit`，云资源选择免费 CPU，镜像使用平台推荐版本。
+4. 从 GitHub 仓库 `BI-coder-1/audio-feature-visualization` 的 `main` 分支导入代码，或按创空间页面给出的 Git 地址上传。
+5. 确认根目录中存在 `app.py`、`requirements.txt`、`streamlit_app.py`、`src/` 和 `web_app/`，然后部署。
+6. 页面、上传、播放、图表和 CSV 下载全部通过后，再把创空间改为公开。
 
-预期地址为 `https://sxu-audio-analysis-202501071025.streamlit.app`，是否可用以平台创建时的实际结果为准。公网入口与本地 Flask 页面共用 `src` 中的算法；完整原理、代码分层和隐私边界见 `docs/streamlit_app.md`。
+实际地址由魔搭在创建时生成，形式通常为 `https://modelscope.cn/studios/<用户名>/<创空间名>`。免费 CPU 空闲后可能休眠，首次重新访问需要等待启动。公网入口与本地 Flask 页面共用 `src` 中的算法；完整原理见 `docs/streamlit_app.md`，逐步部署与验收见 `docs/modelscope_deployment.md`。
 
 ## 已实现特征
 
