@@ -23,13 +23,6 @@ assert "山西大学人工智能学院" in home_html
 assert "2501 · 侯世俊 · 202501071025" in home_html
 assert 'name="author" content="山西大学人工智能学院 2501 侯世俊"' in home_html
 
-health_response = client.get("/health")
-assert health_response.status_code == 200
-assert health_response.get_json() == {
-    "service": "audio-signal-analysis",
-    "status": "ok",
-}
-
 missing_response = client.post("/analyze", data={})
 assert missing_response.status_code == 400
 assert "请先选择待分析的 WAV" in missing_response.get_data(as_text=True)

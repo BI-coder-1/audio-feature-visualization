@@ -31,7 +31,8 @@
 - `docs/` 文档
 - `tests/` 测试
 - `web_app/` 本地交互式网页
-- `render.yaml` Render 公网部署配置
+- `streamlit_app.py` Streamlit Community Cloud 公网入口
+- `.streamlit/` Streamlit 页面与上传限制配置
 
 #### 快速开始
 
@@ -68,13 +69,21 @@
 
 14. 在控制台运行进阶分析：`python main.py`（在菜单中选择 4）
 
+15. 本地预览 Streamlit 公网页面：`streamlit run streamlit_app.py`
+
+16. 运行 Streamlit 页面测试：`python test_streamlit_app.py`
+
 ## 公网部署
 
-本项目已配置为 Render Web Service。PR 合并到 `main` 后，可使用下面的入口创建固定 HTTPS 公网地址：
+本项目使用免费的 Streamlit Community Cloud 提供公网入口，不需要绑定银行卡。PR 合并到 `main` 后：
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/BI-coder-1/audio-feature-visualization)
+1. 登录 [Streamlit Community Cloud](https://share.streamlit.io/)。
+2. 连接 GitHub，并选择 `BI-coder-1/audio-feature-visualization`。
+3. Branch 选择 `main`，Main file path 填写 `streamlit_app.py`。
+4. Advanced settings 中选择 Python 3.12。
+5. 可把自定义子域名设置为 `sxu-audio-analysis-202501071025`，然后点击 Deploy。
 
-生产环境由 Gunicorn 启动 `web_app.wsgi:app`，健康检查地址为 `/health`。免费实例闲置后会休眠，第一次重新访问需要等待平台唤醒。完整步骤与安全边界见 `docs/web_app.md`。
+预期地址为 `https://sxu-audio-analysis-202501071025.streamlit.app`，是否可用以平台创建时的实际结果为准。公网入口与本地 Flask 页面共用 `src` 中的算法；完整原理、代码分层和隐私边界见 `docs/streamlit_app.md`。
 
 ## 已实现特征
 
