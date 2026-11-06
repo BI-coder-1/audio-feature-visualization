@@ -25,13 +25,15 @@
 
 1. `main()` 是页面总装函数，按固定顺序调用其他小函数。
 2. `st.set_page_config()` 设置网页标题、图标和宽屏布局。
-3. `inject_styles()` 注入深蓝色课程设计样式，不复制学校官网素材。
-4. `st.file_uploader()` 在浏览器中显示 WAV 选择框。
-5. `st.button()` 让分析只在用户主动点击后执行。
-6. `st.spinner()` 在计算期间显示等待提示。
-7. `st.metric()`、`st.dataframe()`、`st.image()` 和 `st.audio()` 分别展示元数据、特征表、图像和音频播放器。
-8. `st.download_button()` 把内存中的 CSV 交给浏览器下载。
-9. `st.session_state` 暂存当前会话的结果，避免点击下载或切换控件时立刻丢失分析内容。
+3. `inject_styles()` 使用课程提供的山西大学 PPT 模板配色、细线和留白规则组织页面；校名标识与校徽来自该模板。
+4. 页首采用紧凑校标、作者信息和功能导航；“系统首页、音频分析、结果展示、原理说明”使用页内锚点，GitHub 在新标签页打开项目仓库。
+5. `st.file_uploader()` 在浏览器中显示 WAV 选择框，`st.audio_input()` 调用浏览器麦克风录制 WAV。
+6. `st.button()` 让分析只在用户主动点击后执行。
+7. `st.spinner()` 在计算期间显示等待提示。
+8. `st.metric()`、`st.dataframe()`、`st.image()` 和 `st.audio()` 分别展示元数据、特征表、图像和音频播放器。
+9. `st.download_button()` 把内存中的 CSV 交给浏览器下载。
+10. 上传文件和麦克风录音都转换为 WAV 字节，并进入同一个 `analyze_wav_bytes()`，因此两种输入不会产生两套计算标准。
+11. `st.session_state` 暂存当前会话的结果，避免点击下载或切换控件时立刻丢失分析内容。
 
 页面中的学院、班级、姓名和学号是作者归属标识，不等同于专利或软件著作权登记。
 
@@ -76,7 +78,13 @@ Set-Location -LiteralPath 'G:\ICASSP\python_houshijun_test'
 .\.venv\Scripts\python.exe test_streamlit_app.py
 ```
 
-测试会验证：非 WAV 被拒绝、17 项特征齐全、三张图确为 PNG、CSV 编码正确、双文件顺序正确，并使用 Streamlit 的 `AppTest` 从魔搭入口 `app.py` 启动页面，检查标题和首页是否正常。
+测试会验证：非 WAV 被拒绝、17 项特征齐全、三张图确为 PNG、CSV 编码正确、双文件顺序正确，并使用 Streamlit 的 `AppTest` 从魔搭入口 `app.py` 启动页面，检查标题、上传入口和录音入口是否正常。
+
+### 麦克风录音为什么能直接分析
+
+`st.audio_input()` 在浏览器端请求麦克风权限，并把录音包装为一个内存中的 WAV 文件。程序调用 `getvalue()` 取得字节，再以 `microphone_recording.wav` 作为显示文件名传给已有处理层。后续的格式校验、临时文件、17 项特征、三组图和 CSV 与上传 WAV 完全相同。
+
+公网录音要求浏览器允许麦克风权限，通常也要求页面通过 HTTPS 打开；魔搭公网地址已经使用 HTTPS。本地 `localhost` 也被浏览器视为可用的安全环境。
 
 ## 6. 魔搭公网部署
 
@@ -102,6 +110,7 @@ https://modelscope.cn/studios/<用户名>/<创空间名>
 ## 7. 隐私和能力边界
 
 - 用户文件不写入课程项目的 `data` 目录，也不提交到 GitHub。
+- 麦克风录音只进入当前浏览器会话的内存分析流程，不会写入课程数据集。
 - 临时文件会在本次分析函数结束后删除，但公网平台仍然会接收上传字节，因此不要上传机密、隐私或无权处理的录音。
 - `session_state` 只服务于当前浏览器会话，不是长期数据库。
 - 免费 CPU 存在休眠和资源限制，不承诺高并发或持续在线。
