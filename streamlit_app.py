@@ -45,19 +45,31 @@ def inject_styles() -> None:
         }
         html, body, [class*="css"] {
             font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+            scroll-behavior: smooth;
         }
         .stApp { color: var(--sxu-ink); background: var(--sxu-paper); }
         [data-testid="stHeader"] { background: rgba(248, 249, 248, .92); }
         .block-container { max-width: 1180px; padding-top: 1rem; padding-bottom: 3rem; }
         .sxu-masthead {
             display: flex; align-items: center; justify-content: space-between; gap: 2rem;
-            box-sizing: border-box; width: 100%; max-width: 100%; padding: .6rem 0 1rem;
+            box-sizing: border-box; width: 100%; max-width: 100%; padding: .3rem 0 .65rem;
             overflow: hidden; border-bottom: 1px solid var(--sxu-line);
         }
-        .sxu-logo { display: block; width: 100%; max-width: 430px; height: auto; }
+        .sxu-masthead img.sxu-logo {
+            display: block; width: 260px !important; max-width: 260px !important; height: auto;
+        }
+        .sxu-header-side { display: grid; justify-items: end; gap: .55rem; }
         .sxu-owner { text-align: right; }
         .sxu-owner strong { display: block; color: var(--sxu-teal); font-size: .88rem; font-weight: 600; }
         .sxu-owner span { color: var(--sxu-muted); font-size: .76rem; line-height: 1.8; }
+        .sxu-nav { display: flex; align-items: center; justify-content: flex-end; gap: .2rem; }
+        .sxu-nav a {
+            padding: .42rem .7rem; border-bottom: 2px solid transparent;
+            color: #4f5c5f; font-size: .78rem; text-decoration: none !important; white-space: nowrap;
+        }
+        .sxu-nav a:hover, .sxu-nav a:focus { color: var(--sxu-teal); border-bottom-color: var(--sxu-cyan); }
+        .sxu-nav .github-link { margin-left: .2rem; color: var(--sxu-teal); font-weight: 600; }
+        #home, #analysis, #results, #principle { scroll-margin-top: 4.5rem; }
         .sxu-hero {
             position: relative; min-height: 330px; margin: 0 0 2rem; padding: clamp(3rem, 7vw, 5.5rem) clamp(1rem, 4vw, 3rem);
             overflow: hidden; border-bottom: 1px solid var(--sxu-line); background: var(--sxu-white);
@@ -104,8 +116,11 @@ def inject_styles() -> None:
         @media (max-width: 700px) {
             .sxu-masthead { align-items: flex-start; flex-direction: column; gap: .6rem; }
             .block-container { box-sizing: border-box; padding-left: 1rem; padding-right: 1rem; overflow-x: hidden; }
-            .sxu-masthead img.sxu-logo { width: 330px !important; max-width: 92vw !important; }
+            .sxu-masthead img.sxu-logo { width: 235px !important; max-width: 76vw !important; }
+            .sxu-header-side { width: 100%; justify-items: start; }
             .sxu-owner { text-align: left; }
+            .sxu-nav { justify-content: flex-start; width: 100%; overflow-x: auto; padding-bottom: .15rem; }
+            .sxu-nav a { padding: .38rem .55rem; }
             .sxu-hero { min-height: 290px; padding: 3rem .4rem 2.4rem; }
             .sxu-hero::before { left: .4rem; }
             .sxu-watermark { right: -4rem; width: 68vw; opacity: .07; }
@@ -132,11 +147,20 @@ def render_header() -> None:
     seal_uri = image_data_uri("shanxi-university-seal.png")
     st.markdown(
         f"""
-        <div class="sxu-masthead">
+        <div class="sxu-masthead" id="home">
             <img class="sxu-logo" src="{logo_uri}" alt="山西大学校名标识">
-            <div class="sxu-owner">
-                <strong>山西大学人工智能学院 · Python 程序设计课程设计</strong>
-                <span>2501 班　侯世俊　202501071025</span>
+            <div class="sxu-header-side">
+                <div class="sxu-owner">
+                    <strong>山西大学人工智能学院 · Python 程序设计课程设计</strong>
+                    <span>2501 班　侯世俊　202501071025</span>
+                </div>
+                <nav class="sxu-nav" aria-label="页面功能导航">
+                    <a href="#home">系统首页</a>
+                    <a href="#analysis">音频分析</a>
+                    <a href="#results">结果展示</a>
+                    <a href="#principle">原理说明</a>
+                    <a class="github-link" href="https://github.com/BI-coder-1/audio-feature-visualization" target="_blank" rel="noreferrer noopener">GitHub ↗</a>
+                </nav>
             </div>
         </div>
         <section class="sxu-hero">
@@ -156,6 +180,7 @@ def render_header() -> None:
 def render_single_result(result: dict) -> None:
     """展示单文件的元数据、17 项特征、三组图和 CSV。"""
 
+    st.markdown('<span id="results"></span>', unsafe_allow_html=True)
     st.success(f"分析完成：{result['file_name']}")
     metric_columns = st.columns(4)
     metric_columns[0].metric("采样率", f"{result['sample_rate']:,} Hz")
@@ -267,6 +292,7 @@ def render_comparison_mode() -> None:
 
     if st.session_state.get("comparison_signature") == signature:
         result = st.session_state["comparison_result"]
+        st.markdown('<span id="results"></span>', unsafe_allow_html=True)
         st.success("双文件比较完成")
         st.dataframe(result["table_rows"], hide_index=True, width="stretch")
         st.image(result["chart_png"], caption="幅度与平均能量统一比较", width="stretch")
@@ -290,7 +316,7 @@ def main() -> None:
     )
     inject_styles()
     render_header()
-    st.markdown('<div class="sxu-index">01 / 在线分析</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sxu-index" id="analysis">01 / 在线分析</div>', unsafe_allow_html=True)
     st.header("选择分析模式")
     st.markdown(
         '<div class="privacy-note">隐私提示：公网平台会接收上传内容，请勿上传机密、隐私或无权处理的录音。临时文件在每次分析结束后自动删除。</div>',
@@ -309,6 +335,7 @@ def main() -> None:
     else:
         render_comparison_mode()
 
+    st.markdown('<span id="principle"></span>', unsafe_allow_html=True)
     with st.expander("查看计算流程与指标边界"):
         st.markdown(
             """

@@ -69,6 +69,8 @@ app_test.run(timeout=30)
 assert not app_test.exception
 assert app_test.header[0].value == "选择分析模式"
 assert any("山西大学人工智能学院" in element.value for element in app_test.markdown)
+assert any("系统首页" in element.value for element in app_test.markdown)
+assert any("https://github.com/BI-coder-1/audio-feature-visualization" in element.value for element in app_test.markdown)
 assert app_test.radio[1].options == ["上传 WAV 文件", "使用麦克风录音"]
 
 # 切换到录音模式，确认浏览器录音控件所在分支能够正常渲染。

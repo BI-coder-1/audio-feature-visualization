@@ -26,13 +26,14 @@
 1. `main()` 是页面总装函数，按固定顺序调用其他小函数。
 2. `st.set_page_config()` 设置网页标题、图标和宽屏布局。
 3. `inject_styles()` 使用课程提供的山西大学 PPT 模板配色、细线和留白规则组织页面；校名标识与校徽来自该模板。
-4. `st.file_uploader()` 在浏览器中显示 WAV 选择框，`st.audio_input()` 调用浏览器麦克风录制 WAV。
-5. `st.button()` 让分析只在用户主动点击后执行。
-6. `st.spinner()` 在计算期间显示等待提示。
-7. `st.metric()`、`st.dataframe()`、`st.image()` 和 `st.audio()` 分别展示元数据、特征表、图像和音频播放器。
-8. `st.download_button()` 把内存中的 CSV 交给浏览器下载。
-9. 上传文件和麦克风录音都转换为 WAV 字节，并进入同一个 `analyze_wav_bytes()`，因此两种输入不会产生两套计算标准。
-10. `st.session_state` 暂存当前会话的结果，避免点击下载或切换控件时立刻丢失分析内容。
+4. 页首采用紧凑校标、作者信息和功能导航；“系统首页、音频分析、结果展示、原理说明”使用页内锚点，GitHub 在新标签页打开项目仓库。
+5. `st.file_uploader()` 在浏览器中显示 WAV 选择框，`st.audio_input()` 调用浏览器麦克风录制 WAV。
+6. `st.button()` 让分析只在用户主动点击后执行。
+7. `st.spinner()` 在计算期间显示等待提示。
+8. `st.metric()`、`st.dataframe()`、`st.image()` 和 `st.audio()` 分别展示元数据、特征表、图像和音频播放器。
+9. `st.download_button()` 把内存中的 CSV 交给浏览器下载。
+10. 上传文件和麦克风录音都转换为 WAV 字节，并进入同一个 `analyze_wav_bytes()`，因此两种输入不会产生两套计算标准。
+11. `st.session_state` 暂存当前会话的结果，避免点击下载或切换控件时立刻丢失分析内容。
 
 页面中的学院、班级、姓名和学号是作者归属标识，不等同于专利或软件著作权登记。
 
