@@ -7,64 +7,110 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
+from pathlib import Path
 
 import streamlit as st
 
 from web_app.streamlit_support import analyze_wav_bytes, compare_wav_bytes
 
 
+ASSET_DIR = Path(__file__).parent / "web_app" / "static" / "sxu"
+
+
+@st.cache_data(show_spinner=False)
+def image_data_uri(file_name: str) -> str:
+    """把 PPT 提取的 PNG 转成 data URI，并缓存转换结果。"""
+
+    image_bytes = (ASSET_DIR / file_name).read_bytes()
+    encoded = base64.b64encode(image_bytes).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
+
+
 def inject_styles() -> None:
-    """加入与本地 Flask 版一致的深蓝高校课程设计视觉风格。"""
+    """加入源自山西大学 PPT 模板的扁平学术视觉风格。"""
 
     st.markdown(
         """
         <style>
         :root {
-            --navy-950: #071b30;
-            --navy-900: #0a2747;
-            --navy-800: #103b66;
-            --blue-600: #1474bd;
-            --cyan-400: #4ed6e6;
-            --gold-500: #caa55b;
-            --paper: #f5f7f9;
-            --ink: #142231;
-            --muted: #687889;
+            --sxu-teal: #1b8187;
+            --sxu-cyan: #29c4cd;
+            --sxu-ink: #252d30;
+            --sxu-muted: #747d80;
+            --sxu-line: #d7dcdd;
+            --sxu-paper: #f8f9f8;
+            --sxu-white: #ffffff;
         }
-        .stApp { background: var(--paper); }
-        .block-container { max-width: 1180px; padding-top: 1.2rem; padding-bottom: 3rem; }
-        .site-utility {
-            padding: .45rem 1rem; color: #d9e5ef; background: var(--navy-950);
-            font-size: .78rem; letter-spacing: .04em;
+        html, body, [class*="css"] {
+            font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
         }
-        .site-brand {
-            display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
-            padding: 1.35rem 1rem; border: 1px solid #dbe2e8; background: #fff;
+        .stApp { color: var(--sxu-ink); background: var(--sxu-paper); }
+        [data-testid="stHeader"] { background: rgba(248, 249, 248, .92); }
+        .block-container { max-width: 1180px; padding-top: 1rem; padding-bottom: 3rem; }
+        .sxu-masthead {
+            display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+            box-sizing: border-box; width: 100%; max-width: 100%; padding: .6rem 0 1rem;
+            overflow: hidden; border-bottom: 1px solid var(--sxu-line);
         }
-        .brand-title { color: var(--navy-900); font-family: SimSun, STSong, serif; font-size: 1.8rem; letter-spacing: .08em; }
-        .brand-subtitle { color: var(--muted); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; }
-        .identity-card { padding-left: 1rem; border-left: 2px solid var(--gold-500); text-align: right; }
-        .identity-card strong { display: block; color: var(--navy-800); font-size: .82rem; letter-spacing: .06em; }
-        .identity-card span { color: var(--muted); font: .7rem/1.6 Consolas, monospace; }
-        .hero-panel {
-            margin: 1rem 0 1.6rem; padding: clamp(2rem, 5vw, 4.5rem);
-            color: #fff; background: radial-gradient(circle at 80% 20%, rgba(78,214,230,.18), transparent 30%), linear-gradient(125deg, #082846 0%, #0e4776 64%, #0a2c50 100%);
+        .sxu-logo { display: block; width: 100%; max-width: 430px; height: auto; }
+        .sxu-owner { text-align: right; }
+        .sxu-owner strong { display: block; color: var(--sxu-teal); font-size: .88rem; font-weight: 600; }
+        .sxu-owner span { color: var(--sxu-muted); font-size: .76rem; line-height: 1.8; }
+        .sxu-hero {
+            position: relative; min-height: 330px; margin: 0 0 2rem; padding: clamp(3rem, 7vw, 5.5rem) clamp(1rem, 4vw, 3rem);
+            overflow: hidden; border-bottom: 1px solid var(--sxu-line); background: var(--sxu-white);
         }
-        .hero-kicker { color: var(--cyan-400); font-size: .75rem; font-weight: 700; letter-spacing: .2em; }
-        .hero-panel h1 { margin: .8rem 0; font-family: SimSun, STSong, serif; font-size: clamp(2.6rem, 6vw, 5rem); font-weight: 500; line-height: 1.12; }
-        .hero-panel h1 span { color: #7de5ef; }
-        .hero-panel p { max-width: 720px; color: #dbe9f4; }
-        .section-label { margin-top: 1.4rem; color: var(--blue-600); font-size: .75rem; font-weight: 700; letter-spacing: .18em; }
-        .privacy-note { padding: .8rem 1rem; border-left: 3px solid var(--gold-500); background: #fff8e8; color: #5f4c26; font-size: .85rem; }
-        .author-footer { margin-top: 3rem; padding: 1.4rem; color: #b7cad9; background: #041321; text-align: center; }
-        .author-footer strong { color: #fff; }
-        div[data-testid="stFileUploader"] { padding: 1rem; border: 1px dashed #8da1b3; background: #fff; }
-        div[data-testid="stMetric"] { padding: 1rem; border-top: 3px solid var(--navy-800); background: #fff; }
-        div[data-testid="stDownloadButton"] button, div[data-testid="stButton"] button { border-radius: 0; }
+        .sxu-hero::before {
+            content: ""; position: absolute; top: 0; left: clamp(1rem, 4vw, 3rem);
+            width: 62px; height: 8px; background: var(--sxu-teal);
+            box-shadow: 70px 0 0 var(--sxu-cyan);
+        }
+        .sxu-watermark {
+            position: absolute; right: -2.5rem; top: 50%; width: min(410px, 40vw); transform: translateY(-50%);
+            opacity: .11; mix-blend-mode: multiply; pointer-events: none;
+        }
+        .sxu-hero-content { position: relative; z-index: 1; width: 100%; max-width: 760px; }
+        .sxu-kicker { color: var(--sxu-teal); font: 600 .78rem/1.4 Arial, sans-serif; letter-spacing: .18em; }
+        .sxu-hero h1 {
+            margin: 1.05rem 0 .85rem; color: var(--sxu-ink);
+            font: 300 clamp(2.35rem, 5.2vw, 4.6rem)/1.13 "Microsoft YaHei Light", "微软雅黑 Light", "Microsoft YaHei", sans-serif;
+            letter-spacing: .02em;
+        }
+        .sxu-hero h1 span { color: var(--sxu-teal); }
+        .sxu-hero p { max-width: 720px; margin: 0; color: #586164; font-size: 1rem; line-height: 1.9; overflow-wrap: anywhere; }
+        .sxu-index {
+            display: flex; align-items: center; gap: .8rem; margin-top: 1.5rem;
+            color: var(--sxu-teal); font: 600 .76rem/1 Arial, sans-serif; letter-spacing: .16em;
+        }
+        .sxu-index::before { content: ""; width: 36px; height: 3px; background: var(--sxu-cyan); }
+        .privacy-note {
+            margin: .4rem 0 1rem; padding: .8rem 1rem; border-left: 4px solid var(--sxu-cyan);
+            color: #536063; background: #eef8f8; font-size: .85rem;
+        }
+        h1, h2, h3 { color: var(--sxu-ink); font-family: "Microsoft YaHei Light", "微软雅黑 Light", "Microsoft YaHei", sans-serif; }
+        div[data-testid="stFileUploader"], div[data-testid="stAudioInput"] {
+            padding: 1rem; border: 1px dashed #91b7b9; background: var(--sxu-white);
+        }
+        div[data-testid="stMetric"] { padding: 1rem; border-top: 3px solid var(--sxu-teal); background: var(--sxu-white); }
+        div[data-baseweb="tab-list"] { border-bottom: 1px solid var(--sxu-line); }
+        div[data-testid="stDownloadButton"] button, div[data-testid="stButton"] button {
+            border-radius: 0; border-color: var(--sxu-teal);
+        }
+        div[data-testid="stDownloadButton"] button[kind="primary"], div[data-testid="stButton"] button[kind="primary"] {
+            background: var(--sxu-teal);
+        }
         @media (max-width: 700px) {
-            .site-brand { align-items: flex-start; flex-direction: column; }
-            .identity-card { padding: .7rem 0 0; border-top: 2px solid var(--gold-500); border-left: 0; text-align: left; }
-            .hero-panel { padding: 2rem 1.2rem; }
+            .sxu-masthead { align-items: flex-start; flex-direction: column; gap: .6rem; }
+            .block-container { box-sizing: border-box; padding-left: 1rem; padding-right: 1rem; overflow-x: hidden; }
+            .sxu-masthead img.sxu-logo { width: 330px !important; max-width: 92vw !important; }
+            .sxu-owner { text-align: left; }
+            .sxu-hero { min-height: 290px; padding: 3rem .4rem 2.4rem; }
+            .sxu-hero::before { left: .4rem; }
+            .sxu-watermark { right: -4rem; width: 68vw; opacity: .07; }
+            .sxu-hero h1 { font-size: clamp(2.05rem, 11vw, 3rem); }
+            .sxu-hero p { max-width: 100%; font-size: .92rem; }
         }
         </style>
         """,
@@ -80,26 +126,28 @@ def file_signature(file_name: str, file_bytes: bytes) -> str:
 
 
 def render_header() -> None:
-    """绘制固定标题、作者归属和课程说明。"""
+    """使用 PPT 中的校名标识、校徽水印和版式绘制页首。"""
 
-    st.markdown('<div class="site-utility">Python 程序设计课程设计 · 在线音频分析</div>', unsafe_allow_html=True)
+    logo_uri = image_data_uri("shanxi-university-logo.png")
+    seal_uri = image_data_uri("shanxi-university-seal.png")
     st.markdown(
-        """
-        <div class="site-brand">
-            <div>
-                <div class="brand-title">〰 语音信号分析与可视化系统</div>
-                <div class="brand-subtitle">Audio Signal Analysis &amp; Visualization</div>
-            </div>
-            <div class="identity-card">
-                <strong>山西大学人工智能学院</strong>
-                <span>2501 · 侯世俊 · 202501071025</span>
+        f"""
+        <div class="sxu-masthead">
+            <img class="sxu-logo" src="{logo_uri}" alt="山西大学校名标识">
+            <div class="sxu-owner">
+                <strong>山西大学人工智能学院 · Python 程序设计课程设计</strong>
+                <span>2501 班　侯世俊　202501071025</span>
             </div>
         </div>
-        <div class="hero-panel">
-            <div class="hero-kicker">AUDIO LAB · 数字信号处理</div>
-            <h1>让声音的结构<br><span>清晰可见</span></h1>
-            <p>从基础幅值到短时能量、过零率、频谱统计、MFCC 与 STFT，使用一套可解释流程观察和比较 WAV 音频。</p>
-        </div>
+        <section class="sxu-hero">
+            <img class="sxu-watermark" src="{seal_uri}" alt="">
+            <div class="sxu-hero-content">
+                <div class="sxu-kicker">AUDIO SIGNAL ANALYSIS · VISUALIZATION</div>
+                <h1>语音信号分析<br><span>与可视化系统</span></h1>
+                <p>读取、聆听并理解一段声音：从基础幅值到短时能量、过零率、频谱统计、MFCC 与 STFT，使用一套可解释流程完成分析和比较。</p>
+                <div class="sxu-index">SHANXI UNIVERSITY · 2026</div>
+            </div>
+        </section>
         """,
         unsafe_allow_html=True,
     )
@@ -137,23 +185,46 @@ def render_single_result(result: dict) -> None:
 
 
 def render_single_mode() -> None:
-    """接收一个 WAV，并在按钮触发后执行深度分析。"""
+    """接收上传或现场录制的 WAV，并执行同一套深度分析。"""
 
-    uploaded_file = st.file_uploader(
-        "选择一个 WAV 音频",
-        type=["wav"],
-        accept_multiple_files=False,
-        key="single_uploader",
-        help="单个文件不超过 12 MB；系统不会写入项目 data 目录。",
+    source = st.radio(
+        "音频来源",
+        ["上传 WAV 文件", "使用麦克风录音"],
+        horizontal=True,
+        key="single_source",
     )
 
-    if uploaded_file is not None:
-        file_bytes = uploaded_file.getvalue()
-        signature = file_signature(uploaded_file.name, file_bytes)
+    if source == "上传 WAV 文件":
+        audio_file = st.file_uploader(
+            "选择一个 WAV 音频",
+            type=["wav"],
+            accept_multiple_files=False,
+            key="single_uploader",
+            help="单个文件不超过 12 MB；系统不会写入项目 data 目录。",
+        )
+        empty_message = "请先上传一个 WAV 文件。"
+    else:
+        st.caption("首次录音时，浏览器会请求麦克风权限。录制完成后可先试听，再生成分析结果。")
+        audio_file = st.audio_input(
+            "录制一段音频",
+            sample_rate=16_000,
+            key="single_recorder",
+            help="建议录制 3～10 秒；录音只用于当前会话的分析。",
+        )
+        empty_message = "请点击麦克风按钮开始录音。"
+
+    if audio_file is not None:
+        file_bytes = audio_file.getvalue()
+        file_name = (
+            "microphone_recording.wav"
+            if source == "使用麦克风录音"
+            else audio_file.name
+        )
+        signature = file_signature(file_name, file_bytes)
         if st.button("生成深度分析结果", type="primary", width="stretch"):
             try:
                 with st.spinner("正在读取音频、计算特征并生成图像……"):
-                    result = analyze_wav_bytes(uploaded_file.name, file_bytes)
+                    result = analyze_wav_bytes(file_name, file_bytes)
                 st.session_state["single_result"] = result
                 st.session_state["single_signature"] = signature
             except (ValueError, OSError) as error:
@@ -162,7 +233,7 @@ def render_single_mode() -> None:
         if st.session_state.get("single_signature") == signature:
             render_single_result(st.session_state["single_result"])
     else:
-        st.info("请先上传一个 WAV 文件。")
+        st.info(empty_message)
 
 
 def render_comparison_mode() -> None:
@@ -208,21 +279,6 @@ def render_comparison_mode() -> None:
         )
 
 
-def render_footer() -> None:
-    """展示作者与隐私边界。"""
-
-    st.markdown(
-        """
-        <div class="author-footer">
-            <strong>原创课程设计标识</strong><br>
-            山西大学人工智能学院 · 2501 · 侯世俊 · 学号 202501071025<br>
-            上传文件仅用于本次会话计算，不写入项目数据集
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
 def main() -> None:
     """按固定顺序组装完整页面，供本地和魔搭入口共同调用。"""
 
@@ -234,7 +290,7 @@ def main() -> None:
     )
     inject_styles()
     render_header()
-    st.markdown('<div class="section-label">01 / 在线分析</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sxu-index">01 / 在线分析</div>', unsafe_allow_html=True)
     st.header("选择分析模式")
     st.markdown(
         '<div class="privacy-note">隐私提示：公网平台会接收上传内容，请勿上传机密、隐私或无权处理的录音。临时文件在每次分析结束后自动删除。</div>',
@@ -265,9 +321,6 @@ def main() -> None:
             这些指标用于描述音频，不执行语音识别或身份判断；主频也不自动等同于人的基频。
             """
         )
-
-    render_footer()
-
 
 if __name__ == "__main__":
     main()
